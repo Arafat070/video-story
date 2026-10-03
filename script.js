@@ -56,16 +56,10 @@ function openEnvelope() {
   if (isOpening) return;
   isOpening = true;
 
-  // Вибрация при открытии
   vibrate([20, 30, 40]);
-
-  // Скрываем подсказку
   hintBottom.classList.add("hidden");
-
-  // Анимация открытия конверта
   envelope.classList.add("open");
 
-  // Переход к видео
   setTimeout(() => {
     envelopeScreen.classList.add("hidden");
     videoScreen.classList.add("visible");
@@ -100,7 +94,6 @@ function addTapHandler(element, handler) {
     const deltaY = Math.abs(touch.clientY - startY);
     const deltaTime = Date.now() - startTime;
 
-    // Считаем тапом только если движение меньше 10px и время меньше 500мс
     if (deltaX < 10 && deltaY < 10 && deltaTime < 500) {
       e.preventDefault();
       handler(e);
@@ -117,7 +110,6 @@ function addTapHandler(element, handler) {
   });
 }
 
-// Клик по открытке открывает её
 addTapHandler(envelope, openEnvelope);
 
 // ========== ЛОГИКА ВИДЕО ==========
@@ -151,6 +143,20 @@ addTapHandler(videoOverlay, playVideo);
 mainVideo.addEventListener("ended", () => {
   videoOverlay.classList.remove("hidden");
   mainVideo.controls = false;
+});
+
+// ========== АДАПТАЦИЯ ВИДЕО ПОД ОРИЕНТАЦИЮ ==========
+mainVideo.addEventListener("loadedmetadata", () => {
+  const wrapper = document.querySelector(".video-wrapper");
+  if (!wrapper) return;
+
+  if (mainVideo.videoHeight > mainVideo.videoWidth) {
+    wrapper.setAttribute("data-orientation", "portrait");
+    wrapper.style.aspectRatio = "9 / 16";
+    wrapper.style.maxWidth = "min(80vw, 380px)";
+  } else {
+    wrapper.setAttribute("data-orientation", "landscape");
+  }
 });
 
 // ========== ПАРАЛЛАКС ТОЛЬКО НА DESKTOP ==========
@@ -210,14 +216,3 @@ document.addEventListener(
   },
   { passive: false },
 );
-
-// ========== АДАПТАЦИЯ ВИДЕО ПОД ОРИЕНТАЦИЮ ==========
-mainVideo.addEventListener("loadedmetadata", () => {
-  if (isMobile && mainVideo.videoHeight > mainVideo.videoWidth) {
-    const wrapper = document.querySelector(".video-wrapper");
-    if (wrapper) {
-      wrapper.style.aspectRatio = "9 / 16";
-      wrapper.style.maxWidth = "min(100%, 420px)";
-    }
-  }
-});
